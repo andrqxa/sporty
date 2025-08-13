@@ -1,5 +1,5 @@
 server:
-  port: 8080
+  port: ${SERVER_PORT:8080} # add opportunity to run as : `SERVER_PORT=8081 ./gradlew bootRun` if 8080 is busy
 
 app:
   lock:
@@ -9,5 +9,4 @@ spring:
   data:
     redis:
       host: ${REDIS_HOST:localhost}
-      port: ${REDIS_PORT:6379}
-
+      port: ${REDIS_PORT:6380}  # not 6379 because native redis server was installed before
