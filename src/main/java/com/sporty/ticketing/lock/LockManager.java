@@ -25,7 +25,9 @@ public interface LockManager {
      * @param token unique owner token returned by tryLock
      * @return true if lock was released, false if not owned or missing
      */
-    boolean isUnlock(String key, String token);
+    /** Releases the lock only if the token matches (owner). */
+    //noinspection BooleanMethodNameMustStartWithQuestion
+    boolean unlock(String key, String token);
 
     /**
      * Helper that retries to acquire a lock until deadline.
