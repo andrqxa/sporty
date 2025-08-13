@@ -2,6 +2,8 @@ package com.sporty.ticketing.lock;
 
 import java.time.Duration;
 import java.util.Optional;
+import java.util.concurrent.*;
+import java.util.concurrent.locks.*;
 
 /**
  * Minimal distributed lock abstraction.
@@ -18,11 +20,12 @@ public interface LockManager {
 
     /**
      * Release the lock only if the caller owns it (token matches).
+     * Returns {@code true} on successful release.
      * @param key lock key
      * @param token unique owner token returned by tryLock
      * @return true if lock was released, false if not owned or missing
      */
-    boolean unlock(String key, String token);
+    boolean isUnlock(String key, String token);
 
     /**
      * Helper that retries to acquire a lock until deadline.
@@ -31,21 +34,40 @@ public interface LockManager {
      * @param maxWait how long to wait
      * @return token if acquired within deadline, otherwise empty
      */
-    default Optional<String> tryLockWithRetry(String key, Duration ttl, Duration maxWait) {
-        final long deadline = System.nanoTime() + maxWait.toNanos();
-        long sleep = 10; // start with 10 ms backoff
-        while (System.nanoTime() < deadline) {
-            var token = tryLock(key, ttl);
-            if (token.isPresent()) return token;
-            try {
-                Thread.sleep(Math.min(sleep, 100)); // cap backoff
-            } catch (InterruptedException ie) {
-                Thread.currentThread().interrupt();
+    default Optional<String> tryLockWithRetry(String key,
+                                              Duration ttl,
+                                              Duration maxWait) {
+        long deadlineNanos = System.nanoTime() + maxWait.toNanos();
+
+        long sleepNanos = 10_000_000L;     // 10 ms
+        final long maxSleepNanos = 100_000_000L; // 100 ms
+
+        while (true) {
+            long now = System.nanoTime();
+            if (now >= deadlineNanos) {
                 return Optional.empty();
             }
-            // linear backoff with jitter
-            sleep = Math.min(sleep + 10, 100);
+
+            var token = tryLock(key, ttl);
+            if (token.isPresent()) {
+                return token;
+            }
+
+            // Add up to 5 ms jitter to avoid synchronization of retries
+            long jitter = ThreadLocalRandom.current().nextLong(0L, 5_000_000L);
+
+            long waitNanos = sleepNanos + jitter;
+            if (maxSleepNanos < waitNanos) {
+                waitNanos = maxSleepNanos;
+            }
+
+            LockSupport.parkNanos(waitNanos);
+
+            // Linear backoff capped at maxSleepNanos
+            sleepNanos += 10_000_000L;
+            if (maxSleepNanos < sleepNanos) {
+                sleepNanos = maxSleepNanos;
+            }
         }
-        return Optional.empty();
     }
 }

@@ -38,7 +38,7 @@ public class RedisLockManager implements LockManager {
     }
 
     @Override
-    public boolean unlock(String key, String token) {
+    public boolean isUnlock(String key, String token) {
         Long res = redis.execute(releaseScript, List.of(key), token);
         return res != null && res == 1L;
     }
