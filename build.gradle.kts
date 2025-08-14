@@ -36,6 +36,10 @@ dependencies {
     annotationProcessor("org.springframework.boot:spring-boot-configuration-processor")
 
     testImplementation("org.springframework.boot:spring-boot-starter-test")
+
+    // Testcontainers: JUnit 5 + Redis
+    testImplementation("org.testcontainers:junit-jupiter:1.20.1")
+    testImplementation("org.testcontainers:redis:1.20.1")
 }
 
 testing {
@@ -47,4 +51,3 @@ testing {
         }
     }
 }
-
