@@ -10,12 +10,14 @@ import org.junit.jupiter.api.Test;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
+import org.springframework.test.annotation.*;
 
 import java.util.UUID;
 
 /**
  * Basic end-to-end flow: create -> assign -> update status.
  */
+@DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_CLASS)
 public class TicketHappyPathIT extends BaseIntegrationTest {
 
     @Test

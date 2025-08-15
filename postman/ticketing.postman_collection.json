@@ -1,0 +1,97 @@
+{
+  "info": {
+    "name": "Ticketing API",
+    "_postman_id": "c6a5a6d3-7b5b-4d07-9e4c-2a0f1a9d1e10",
+    "description": "Minimal REST API for ticketing with Redis-backed distributed locks.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "Create Ticket",
+      "request": {
+        "method": "POST",
+        "header": [{ "key": "Content-Type", "value": "application/json" }],
+        "url": { "raw": "{{baseUrl}}/tickets", "host": ["{{baseUrl}}"], "path": ["tickets"] },
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"userId\": \"user-001\",\n  \"subject\": \"Login not working\",\n  \"description\": \"I can't sign in\"\n}"
+        }
+      },
+      "response": [],
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "// Save ticketId to environment",
+              "let json = pm.response.json();",
+              "pm.environment.set('ticketId', json.ticketId);"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Assign Ticket",
+      "request": {
+        "method": "PATCH",
+        "header": [{ "key": "Content-Type", "value": "application/json" }],
+        "url": {
+          "raw": "{{baseUrl}}/tickets/{{ticketId}}/assign",
+          "host": ["{{baseUrl}}"],
+          "path": ["tickets", "{{ticketId}}", "assign"]
+        },
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"assigneeId\": \"agent-123\"\n}"
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Update Status",
+      "request": {
+        "method": "PATCH",
+        "header": [{ "key": "Content-Type", "value": "application/json" }],
+        "url": {
+          "raw": "{{baseUrl}}/tickets/{{ticketId}}/status",
+          "host": ["{{baseUrl}}"],
+          "path": ["tickets", "{{ticketId}}", "status"]
+        },
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"status\": \"in_progress\"\n}"
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Race: Assign A",
+      "request": {
+        "method": "PATCH",
+        "header": [{ "key": "Content-Type", "value": "application/json" }],
+        "url": {
+          "raw": "{{baseUrl}}/tickets/{{ticketId}}/assign",
+          "host": ["{{baseUrl}}"],
+          "path": ["tickets", "{{ticketId}}", "assign"]
+        },
+        "body": { "mode": "raw", "raw": "{\n  \"assigneeId\": \"agent-A\"\n}" }
+      }
+    },
+    {
+      "name": "Race: Assign B",
+      "request": {
+        "method": "PATCH",
+        "header": [{ "key": "Content-Type", "value": "application/json" }],
+        "url": {
+          "raw": "{{baseUrl}}/tickets/{{ticketId}}/assign",
+          "host": ["{{baseUrl}}"],
+          "path": ["tickets", "{{ticketId}}", "assign"]
+        },
+        "body": { "mode": "raw", "raw": "{\n  \"assigneeId\": \"agent-B\"\n}" }
+      }
+    }
+  ]
+}
+

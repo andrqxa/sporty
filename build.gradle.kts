@@ -28,19 +28,20 @@ repositories {
 }
 
 dependencies {
-    // This dependency is used by the application.
+    // Spring Boot starters
     implementation("org.springframework.boot:spring-boot-starter-web")
     implementation("org.springframework.boot:spring-boot-starter-validation")
-    implementation("org.springframework.boot:spring-boot-starter-data-redis") // Lettuce by default
+    implementation("org.springframework.boot:spring-boot-starter-data-redis")
 
     annotationProcessor("org.springframework.boot:spring-boot-configuration-processor")
 
+    // Test dependencies
     testImplementation("org.springframework.boot:spring-boot-starter-test")
+    testImplementation("org.springframework.boot:spring-boot-testcontainers")
+    testImplementation("org.testcontainers:junit-jupiter")
 
-    // Testcontainers: JUnit 5 + Redis
-    testImplementation("org.testcontainers:junit-jupiter:1.20.1")
-    testImplementation("org.testcontainers:redis:1.20.1")
-}
+    // PATCH support for HTTP Components (the version is controlled by Spring Boot BOM)
+    testImplementation("org.apache.httpcomponents.client5:httpclient5")}
 
 testing {
     suites {
@@ -50,4 +51,29 @@ testing {
             useJUnitJupiter()
         }
     }
+}
+
+// Exclude integration tests (classes ending with *IT) from the default 'test' task
+tasks.test {
+    useJUnitPlatform()
+    exclude("**/*IT.class")
+}
+
+// A dedicated task to run integration tests (classes ending with *IT)
+val integrationTest by tasks.registering(Test::class) {
+    description = "Runs integration tests."
+    group = "verification"
+    useJUnitPlatform()
+    // include only *IT tests living in the standard test source set output
+    testClassesDirs = sourceSets["test"].output.classesDirs
+    classpath = sourceSets["test"].runtimeClasspath
+    include("**/*IT.class")
+    shouldRunAfter(tasks.test)
+}
+
+tasks.test {
+    maxParallelForks = 1
+}
+tasks.named<Test>("integrationTest") {
+    maxParallelForks = 1
 }

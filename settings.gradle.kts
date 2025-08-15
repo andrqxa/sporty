@@ -13,3 +13,6 @@ plugins {
 
 rootProject.name = "ticketing-system"
 
+if (gradle.startParameter.taskNames.contains("integrationTest")) {
+    System.setProperty("org.gradle.unsafe.configuration-cache", "false")
+}

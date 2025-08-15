@@ -3,6 +3,7 @@ package com.sporty.ticketing.it;
 import com.sporty.ticketing.dto.*;
 import org.junit.jupiter.api.*;
 import org.springframework.http.*;
+import org.springframework.test.annotation.*;
 
 import java.util.*;
 import java.util.concurrent.*;
@@ -13,6 +14,7 @@ import static org.assertj.core.api.Assertions.*;
  * Concurrency race: two agents try to assign the same ticket concurrently.
  * Exactly one must succeed (200), the other must receive 409 Conflict.
  */
+@DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_CLASS)
 public class TicketAssignRaceIT extends BaseIntegrationTest {
 
     @Test
