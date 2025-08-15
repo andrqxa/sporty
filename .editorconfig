@@ -1,0 +1,17 @@
+root = true
+
+[*.java]
+# Never use wildcard imports for regular classes
+ij_java_class_count_to_use_import_on_demand = 999
+# Never use wildcard imports for static members
+ij_java_names_count_to_use_static_import_on_demand = 999
+
+# Automatically remove unused imports on the fly
+ij_java_optimize_imports_on_the_fly = true
+
+# Sort imports by groups: all other, javax, java, org, com
+ij_java_imports_layout = *, |, javax.**, java.**, |, org.**, com.**, |
+
+# Add a blank line between different import groups
+ij_java_imports_layout_blanks_between_groups = true
+
