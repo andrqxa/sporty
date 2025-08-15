@@ -14,7 +14,18 @@ import java.time.Duration;
 import java.util.UUID;
 
 /**
- * Ticket application service. Critical updates are protected by a distributed lock.
+ * Application service for managing {@link Ticket} entities.
+ * <p>
+ * This service coordinates business operations such as ticket creation,
+ * assignment to agents, and status updates. Operations that modify
+ * a ticket are protected by a distributed lock (via {@link LockManager})
+ * to prevent race conditions in concurrent environments.
+ * </p>
+ *
+ * <p>
+ * Lock behavior is configured via {@link LockProperties}, including
+ * the default lock TTL.
+ * </p>
  */
 @Service
 public class TicketService {
@@ -31,13 +42,31 @@ public class TicketService {
         this.props = props;
     }
 
-    /** Creates and persists a new ticket. */
+    /**
+     * Creates and persists a new ticket.
+     *
+     * @param userId      the ID of the user creating the ticket
+     * @param subject     the ticket subject
+     * @param description the ticket description (may be {@code null})
+     * @return the created {@link Ticket}
+     */
     public Ticket create(String userId, String subject, String description) {
         var t = Ticket.newTicket(userId, subject, description);
         return repo.save(t);
     }
 
-    /** Assigns a ticket to an agent under a distributed lock. */
+    /**
+     * Assigns a ticket to an agent under a distributed lock.
+     * <p>
+     * If the lock cannot be acquired within 300 ms, a {@link ConflictException} is thrown.
+     * </p>
+     *
+     * @param id         the ticket ID
+     * @param assigneeId the agent ID to assign
+     * @return the updated {@link Ticket}
+     * @throws NotFoundException   if the ticket does not exist
+     * @throws ConflictException   if the ticket is currently locked by another process
+     */
     public Ticket assign(UUID id, String assigneeId) {
         var key = "lock:ticket:" + id;
         var ttl = Duration.ofMillis(props.getTtlMs());
@@ -59,7 +88,18 @@ public class TicketService {
         }
     }
 
-    /** Updates ticket status under a distributed lock. */
+    /**
+     * Updates the status of a ticket under a distributed lock.
+     * <p>
+     * If the lock cannot be acquired within 300 ms, a {@link ConflictException} is thrown.
+     * </p>
+     *
+     * @param id     the ticket ID
+     * @param status the new {@link TicketStatus}
+     * @return the updated {@link Ticket}
+     * @throws NotFoundException   if the ticket does not exist
+     * @throws ConflictException   if the ticket is currently locked by another process
+     */
     public Ticket updateStatus(UUID id, TicketStatus status) {
         var key = "lock:ticket:" + id;
         var ttl = Duration.ofMillis(props.getTtlMs());

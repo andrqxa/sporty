@@ -5,15 +5,20 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.context.properties.ConfigurationPropertiesScan;
 
 /**
- * Entry point for the Ticketing System application.
+ * Main entry point for the Ticketing System application.
+ * <p>
+ * This class bootstraps the Spring Boot application and enables scanning
+ * for configuration properties via {@link ConfigurationPropertiesScan}.
+ * </p>
  */
 @SpringBootApplication
-@ConfigurationPropertiesScan // enables @ConfigurationProperties scanning
+@ConfigurationPropertiesScan // Enables @ConfigurationProperties scanning
 public class TicketingApplication {
 
     /**
-     * Bootstraps the Spring application.
-     * @param args application args
+     * Starts the Ticketing System application.
+     *
+     * @param args command-line arguments passed to the application
      */
     public static void main(String[] args) {
         SpringApplication.run(TicketingApplication.class, args);

@@ -15,7 +15,26 @@ import org.springframework.test.annotation.*;
 import java.util.UUID;
 
 /**
- * Basic end-to-end flow: create -> assign -> update status.
+ * Integration test verifying the "happy path" for ticket lifecycle operations.
+ *
+ * <p>This scenario tests the basic, successful end-to-end flow of the Ticketing API:</p>
+ * <ol>
+ *   <li>Create a new ticket via {@code POST /tickets}.</li>
+ *   <li>Assign the ticket to an agent via {@code PATCH /tickets/{id}/assign}.</li>
+ *   <li>Update the ticket status via {@code PATCH /tickets/{id}/status}.</li>
+ * </ol>
+ *
+ * <p>Each step asserts that:</p>
+ * <ul>
+ *   <li>The HTTP response status is 2xx (success).</li>
+ *   <li>The response body is non-null.</li>
+ *   <li>The returned ticket representation reflects the expected changes
+ *       (correct assignee after assignment, correct status after update).</li>
+ * </ul>
+ *
+ * <p>This test ensures that the main application flow works correctly without
+ * concurrency conflicts or invalid input, and that persistence of changes
+ * through the repository layer is functioning as expected.</p>
  */
 @DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_CLASS)
 public class TicketHappyPathIT extends BaseIntegrationTest {

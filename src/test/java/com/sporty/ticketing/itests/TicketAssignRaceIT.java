@@ -11,8 +11,25 @@ import java.util.concurrent.*;
 import static org.assertj.core.api.Assertions.*;
 
 /**
- * Concurrency race: two agents try to assign the same ticket concurrently.
- * Exactly one must succeed (200), the other must receive 409 Conflict.
+ * Integration test verifying distributed locking behavior during concurrent ticket assignment.
+ *
+ * <p>This scenario simulates a race condition where two different agents attempt to assign
+ * the same ticket at exactly the same time. The system uses a Redis-backed {@code LockManager}
+ * to ensure that only one of the competing requests succeeds, while the other must fail
+ * with HTTP 409 (Conflict).</p>
+ *
+ * <p>Test flow:</p>
+ * <ol>
+ *   <li>Create a new ticket via {@code POST /tickets}.</li>
+ *   <li>Prepare two {@code PATCH /tickets/{id}/assign} requests with different assignee IDs.</li>
+ *   <li>Trigger both requests concurrently using {@link ExecutorService} and {@link CountDownLatch}
+ *       to ensure near-simultaneous start.</li>
+ *   <li>Verify that exactly one request completes successfully (HTTP 200) and exactly one fails with 409 Conflict.</li>
+ *   <li>Fetch the winner response and assert that the assigned agent is either "agent-A" or "agent-B".</li>
+ * </ol>
+ *
+ * <p>This test ensures correctness of concurrency control and verifies that Redis-based locking
+ * works as expected under contention.</p>
  */
 @DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_CLASS)
 public class TicketAssignRaceIT extends BaseIntegrationTest {
