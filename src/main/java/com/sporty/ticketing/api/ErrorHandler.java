@@ -1,12 +1,14 @@
 package com.sporty.ticketing.api;
 
-import com.sporty.ticketing.exception.*;
-import org.springframework.http.*;
-import org.springframework.validation.*;
-import org.springframework.web.bind.*;
-import org.springframework.web.bind.annotation.*;
-
-import java.util.*;
+import com.sporty.ticketing.exception.ConflictException;
+import com.sporty.ticketing.exception.NotFoundException;
+import java.util.Map;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.validation.BindException;
+import org.springframework.web.bind.MethodArgumentNotValidException;
+import org.springframework.web.bind.annotation.ExceptionHandler;
+import org.springframework.web.bind.annotation.RestControllerAdvice;
 
 /**
  * Global exception handler that maps domain-specific and validation errors to corresponding HTTP
