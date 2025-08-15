@@ -1,4 +1,4 @@
-package com.sporty.ticketing.it;
+package com.sporty.ticketing.itests;
 
 import com.sporty.ticketing.dto.*;
 import org.junit.jupiter.api.*;
