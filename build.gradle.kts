@@ -76,4 +76,6 @@ tasks.test {
 }
 tasks.named<Test>("integrationTest") {
     maxParallelForks = 1
+    outputs.upToDateWhen { false }
+    outputs.cacheIf { false }
 }
